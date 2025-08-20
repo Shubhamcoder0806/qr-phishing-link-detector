@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishCheck - QR & URL Scanner</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header>
+      <div class="head-left">
+        <img src="company2.png" alt="logo">
+        <h1>PhishCheck</h1>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">About Us</a></li>
+        </ul>
+      </nav>
+      <div class="head-right">
+        <a href="#">New Account</a>
+        <div class="button-box">
+          <button>Sign In</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <h1>Guarding Your Clicks in a World Full of Threats</h1>
+      <h3>Enter any URL or Scan a QR Code. Get instant results. Browse safely.</h3>
+
+      <!-- URL TEST -->
+      <div class="link-test">
+        <form class="search-bar">
+          <input type="text" placeholder="Enter URL" name="q">
+          <button type="submit">
+            <img src="image.png" alt="">
+          </button>
+        </form>
+      </div>
+
+      <!-- QR READER -->
+      <div class="qr-box">
+        <h3>Scan a QR Code</h3>
+        <div id="qr-reader"></div>
+        <p id="qr-result"></p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function onScanSuccess(decodedText) {
+        document.getElementById("qr-result").innerText = `Scanned: ${decodedText}`;
+      }
+
+      if (document.getElementById("qr-reader")) {
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+          "qr-reader",
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          false
+        );
+        html5QrcodeScanner.render(onScanSuccess);
+      }
+    });
+  </script>
+</body>
+</html>

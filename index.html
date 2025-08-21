@@ -37,12 +37,13 @@
 
       <!-- URL TEST -->
       <div class="link-test">
-        <form class="search-bar">
-          <input type="text" placeholder="Enter URL" name="q">
-          <button type="submit">
-            <img src="image.png" alt="">
-          </button>
-        </form>
+       <form class="search-bar" id="url-search">
+  <input type="text" placeholder="Enter URL" name="q" id="url-input">
+  <button type="submit">
+    <img src="image.png" alt="">
+  </button>
+</form>
+<div id="url-result"></div>
       </div>
 
       <!-- QR READER -->
@@ -54,21 +55,7 @@
     </section>
   </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      function onScanSuccess(decodedText) {
-        document.getElementById("qr-result").innerText = `Scanned: ${decodedText}`;
-      }
-
-      if (document.getElementById("qr-reader")) {
-        let html5QrcodeScanner = new Html5QrcodeScanner(
-          "qr-reader",
-          { fps: 10, qrbox: { width: 250, height: 250 } },
-          false
-        );
-        html5QrcodeScanner.render(onScanSuccess);
-      }
-    });
+  <script src="script.js">
   </script>
 </body>
 </html>

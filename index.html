@@ -785,8 +785,8 @@
       resultIcon.className = 'fas fa-spinner fa-spin result-icon';
 
       try {
-        // Make actual API call to the Flask backend
-        const response = await fetch(check.py, {
+        // Make API call to the backend endpoint
+        const response = await fetch('/api/check-url', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -834,6 +834,16 @@
             ssl: 'Unknown',
             threatLevel: 'Cannot Determine'
           };
+        } else {
+          // For unknown status or mock data
+          status = 'Analysis Complete';
+          message = data.message || 'URL analysis finished';
+          iconClass = 'fas fa-info-circle result-icon';
+          detailsData = {
+            domainAge: data.domain_info?.domain_age || 'Unknown',
+            ssl: data.ssl_info?.ssl_valid ? 'Valid Certificate' : 'No SSL',
+            threatLevel: `Risk Score: ${data.risk_score || 0}/100`
+          };
         }
 
         // Update UI with results
@@ -857,7 +867,7 @@
       } catch (error) {
         console.error('API Error:', error);
         urlStatus.textContent = 'Connection Error';
-        urlMessage.textContent = 'Unable to connect to security server. Please ensure the backend is running on localhost:5000';
+        urlMessage.textContent = 'Unable to connect to security server. Please try again later.';
         resultIcon.className = 'fas fa-times-circle result-icon result-danger';
       }
     });
@@ -924,7 +934,7 @@
       if (isUrl) {
         // Automatically analyze the URL if it's detected
         try {
-          const response = await fetch(check.py, {
+          const response = await fetch('/api/check-url', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -949,20 +959,17 @@
         }
       } else {
         document.getElementById('qr-message').textContent = 'Text content scanned successfully';
+        qrResult.querySelector('.result-icon').className = 'fas fa-check-circle result-icon result-safe';
       }
     }
 
     function onQrScanError(errorMessage) {
       // Handle scan errors silently
     }
-     fetch(check.py, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ url: url })
-});
-      </script>
+  </script>
 </body>
 </html>
+
 
 
 

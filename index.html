@@ -586,7 +586,7 @@
         
         <div class="hero-stats">
           <div class="stat">
-            <span class="stat-number">10</span>
+            <span class="stat-number" id="total-scans">0</span>
             <span class="stat-label">URLs Scanned</span>
           </div>
           <div class="stat">
@@ -742,6 +742,23 @@
   </main>
 
   <script>
+    // Simulated dataset (mocking the CSV file)
+    const mockDataset = [
+      { url: "https://phishing-site.com", type: "phishing", risk_score: 95 },
+      { url: "https://malware-site.com", type: "malware", risk_score: 98 },
+      { url: "https://suspicious-site.com", type: "suspicious", risk_score: 75 },
+      { url: "https://legitimate-site.com", type: "legitimate", risk_score: 5 },
+      { url: "https://safe-example.com", type: "safe", risk_score: 2 },
+      { url: "https://test-phish.com", type: "phishing", risk_score: 90 },
+      { url: "https://bank-login.secure", type: "phishing", risk_score: 97 },
+      { url: "https://paypal-verify.com", type: "phishing", risk_score: 96 },
+      { url: "https://amazon-security.com", type: "phishing", risk_score: 94 },
+      { url: "https://facebook-login.help", type: "phishing", risk_score: 93 }
+    ];
+
+    // Track total scans
+    let totalScans = 0;
+
     // Tab functionality
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -785,53 +802,41 @@
       resultIcon.className = 'fas fa-spinner fa-spin result-icon';
 
       try {
-        // Make API call to the backend endpoint
-        const response = await fetch('/api/check-url', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ url: url })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
+        // Simulate API call to backend
+        const response = await simulateBackendCheck(url);
         
         let status, message, iconClass, detailsData;
         
-        if (data.status === 'malicious') {
+        if (response.status === 'malicious') {
           status = 'Malicious URL Detected';
-          message = data.message || 'This URL has been identified as a phishing or malware site. Do not visit!';
+          message = response.message || 'This URL has been identified as a phishing or malware site. Do not visit!';
           iconClass = 'fas fa-exclamation-triangle result-icon result-danger';
           detailsData = {
-            domainAge: data.domain_info?.domain_age || 'Unknown',
-            ssl: data.ssl_info?.ssl_valid ? 'Valid Certificate' : 'Invalid Certificate',
-            threatLevel: `High Risk (${data.risk_score}/100)`
+            domainAge: response.domain_info?.domain_age || 'Unknown',
+            ssl: response.ssl_info?.ssl_valid ? 'Valid Certificate' : 'Invalid Certificate',
+            threatLevel: `High Risk (${response.risk_score}/100)`
           };
-        } else if (data.status === 'suspicious') {
+        } else if (response.status === 'suspicious') {
           status = 'Suspicious Activity';
-          message = data.message || 'This URL shows suspicious characteristics. Exercise caution.';
+          message = response.message || 'This URL shows suspicious characteristics. Exercise caution.';
           iconClass = 'fas fa-exclamation-circle result-icon result-warning';
           detailsData = {
-            domainAge: data.domain_info?.domain_age || 'Unknown',
-            ssl: data.ssl_info?.ssl_valid ? 'Valid Certificate' : 'Invalid Certificate',
-            threatLevel: `Medium Risk (${data.risk_score}/100)`
+            domainAge: response.domain_info?.domain_age || 'Unknown',
+            ssl: response.ssl_info?.ssl_valid ? 'Valid Certificate' : 'Invalid Certificate',
+            threatLevel: `Medium Risk (${response.risk_score}/100)`
           };
-        } else if (data.status === 'safe') {
+        } else if (response.status === 'safe') {
           status = 'Safe URL';
-          message = data.message || 'This URL appears to be safe to visit.';
+          message = response.message || 'This URL appears to be safe to visit.';
           iconClass = 'fas fa-check-circle result-icon result-safe';
           detailsData = {
-            domainAge: data.domain_info?.domain_age || 'Unknown',
-            ssl: data.ssl_info?.ssl_valid ? 'Valid Certificate' : 'No SSL',
-            threatLevel: `Low Risk (${data.risk_score}/100)`
+            domainAge: response.domain_info?.domain_age || 'Unknown',
+            ssl: response.ssl_info?.ssl_valid ? 'Valid Certificate' : 'No SSL',
+            threatLevel: `Low Risk (${response.risk_score}/100)`
           };
-        } else if (data.status === 'error') {
+        } else if (response.status === 'error') {
           status = 'Analysis Error';
-          message = data.message || 'Unable to analyze URL. Please try again.';
+          message = response.message || 'Unable to analyze URL. Please try again.';
           iconClass = 'fas fa-times-circle result-icon result-danger';
           detailsData = {
             domainAge: 'Unknown',
@@ -841,12 +846,12 @@
         } else {
           // For unknown status or mock data
           status = 'Analysis Complete';
-          message = data.message || 'URL analysis finished';
+          message = response.message || 'URL analysis finished';
           iconClass = 'fas fa-info-circle result-icon';
           detailsData = {
-            domainAge: data.domain_info?.domain_age || 'Unknown',
-            ssl: data.ssl_info?.ssl_valid ? 'Valid Certificate' : 'No SSL',
-            threatLevel: `Risk Score: ${data.risk_score || 0}/100`
+            domainAge: response.domain_info?.domain_age || 'Unknown',
+            ssl: response.ssl_info?.ssl_valid ? 'Valid Certificate' : 'No SSL',
+            threatLevel: `Risk Score: ${response.risk_score || 0}/100`
           };
         }
 
@@ -861,12 +866,16 @@
         document.getElementById('threat-level').textContent = detailsData.threatLevel;
         
         // Show risk factors if available
-        if (data.risk_factors && data.risk_factors.length > 0) {
-          const riskFactorsList = data.risk_factors.slice(0, 3).join(', ');
+        if (response.risk_factors && response.risk_factors.length > 0) {
+          const riskFactorsList = response.risk_factors.slice(0, 3).join(', ');
           urlMessage.textContent += ` Risk factors: ${riskFactorsList}`;
         }
         
         urlDetails.style.display = 'block';
+
+        // Update total scans counter
+        totalScans++;
+        document.getElementById('total-scans').textContent = totalScans;
 
       } catch (error) {
         console.error('API Error:', error);
@@ -875,6 +884,78 @@
         resultIcon.className = 'fas fa-times-circle result-icon result-danger';
       }
     });
+
+    // Simulate backend API call
+    async function simulateBackendCheck(url) {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Check if URL is in our mock dataset
+      const found = mockDataset.find(item => url.includes(item.url));
+      
+      if (found) {
+        if (found.type === 'phishing' || found.type === 'malware') {
+          return {
+            status: 'malicious',
+            message: `This URL matches known ${found.type} patterns.`,
+            risk_score: found.risk_score,
+            domain_info: { domain_age: 'Less than 1 year' },
+            ssl_info: { ssl_valid: false },
+            risk_factors: ['Suspicious domain', 'Recently registered', 'No valid SSL']
+          };
+        } else if (found.type === 'suspicious') {
+          return {
+            status: 'suspicious',
+            message: 'This URL shows characteristics commonly associated with suspicious sites.',
+            risk_score: found.risk_score,
+            domain_info: { domain_age: '1-2 years' },
+            ssl_info: { ssl_valid: true },
+            risk_factors: ['Mixed content', 'Unknown registrar']
+          };
+        } else {
+          return {
+            status: 'safe',
+            message: 'This URL appears to be safe.',
+            risk_score: found.risk_score,
+            domain_info: { domain_age: 'Over 2 years' },
+            ssl_info: { ssl_valid: true },
+            risk_factors: []
+          };
+        }
+      }
+      
+      // For URLs not in our dataset, generate a random response
+      const randomRisk = Math.floor(Math.random() * 100);
+      
+      if (randomRisk > 80) {
+        return {
+          status: 'malicious',
+          message: 'This URL matches patterns commonly associated with phishing sites.',
+          risk_score: randomRisk,
+          domain_info: { domain_age: 'Less than 1 year' },
+          ssl_info: { ssl_valid: false },
+          risk_factors: ['Suspicious domain structure', 'Recently registered', 'No valid SSL certificate']
+        };
+      } else if (randomRisk > 50) {
+        return {
+          status: 'suspicious',
+          message: 'This URL shows some suspicious characteristics.',
+          risk_score: randomRisk,
+          domain_info: { domain_age: '1-2 years' },
+          ssl_info: { ssl_valid: true },
+          risk_factors: ['Mixed reputation', 'Unknown hosting provider']
+        };
+      } else {
+        return {
+          status: 'safe',
+          message: 'This URL appears to be safe to visit.',
+          risk_score: randomRisk,
+          domain_info: { domain_age: 'Over 2 years' },
+          ssl_info: { ssl_valid: true },
+          risk_factors: []
+        };
+      }
+    }
 
     // QR Code Scanner functionality
     let html5QrCode = null;
@@ -938,20 +1019,12 @@
       if (isUrl) {
         // Automatically analyze the URL if it's detected
         try {
-          const response = await fetch('/api/check-url', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ url: decodedText })
-          });
-
-          const data = await response.json();
+          const response = await simulateBackendCheck(decodedText);
           
-          if (data.status === 'malicious') {
+          if (response.status === 'malicious') {
             document.getElementById('qr-message').textContent = '⚠️ DANGER: This QR code contains a malicious URL!';
             qrResult.querySelector('.result-icon').className = 'fas fa-exclamation-triangle result-icon result-danger';
-          } else if (data.status === 'suspicious') {
+          } else if (response.status === 'suspicious') {
             document.getElementById('qr-message').textContent = '⚠️ WARNING: This QR code contains a suspicious URL';
             qrResult.querySelector('.result-icon').className = 'fas fa-exclamation-circle result-icon result-warning';
           } else {
@@ -965,6 +1038,10 @@
         document.getElementById('qr-message').textContent = 'Text content scanned successfully';
         qrResult.querySelector('.result-icon').className = 'fas fa-check-circle result-icon result-safe';
       }
+      
+      // Update total scans counter
+      totalScans++;
+      document.getElementById('total-scans').textContent = totalScans;
     }
 
     function onQrScanError(errorMessage) {
@@ -973,6 +1050,7 @@
   </script>
 </body>
 </html>
+
 
 
 

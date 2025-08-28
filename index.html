@@ -786,7 +786,7 @@
 
       try {
         // Make actual API call to the Flask backend
-        const response = await fetch('http://localhost:5000/api/check', {
+        const response = await fetch('api/check', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -924,7 +924,7 @@
       if (isUrl) {
         // Automatically analyze the URL if it's detected
         try {
-          const response = await fetch('http://localhost:5000/check', {
+          const response = await fetch('/api/check', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -963,3 +963,4 @@
       </script>
 </body>
 </html>
+

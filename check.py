@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # Load dataset once
-dataset_path = os.path.join(os.path.dirname(__file__), "dataset.csv")
+dataset_path = os.path.join(os.path.dirname(__file__), "urls.csv")
 df = pd.read_csv(dataset_path)
 
 def handler(request):
@@ -36,3 +36,4 @@ def handler(request):
             "statusCode": 500,
             "body": json.dumps({"status": "error", "message": str(e)})
         }
+

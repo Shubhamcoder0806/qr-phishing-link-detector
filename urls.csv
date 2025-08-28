@@ -1,13 +1,13 @@
-url, domain, status, threat_level, risk_score,'timestamp', 'protocol', 'ssl_valid', 'ip_address','risk_factors', 'analyzed_by', 'notes', 'category'
-https://google.com', 'google.com', 'safe', 'low', 5, '2024-08-28T10:30:00', 'https', True, '142.250.191.14', '["Minor risk factors"]', 'system', 'Legitimate search engine', 'verified'],
-https://facebook.com', 'facebook.com', 'safe', 'low', 10, '2024-08-28T10:31:00', 'https', True, '157.240.241.35', '["Standard social media site"]', 'system', 'Popular social network', 'verified'],
-https://malware-example.com', 'malware-example.com', 'malicious', 'high', 95, '2024-08-28T10:32:00', 'https', False, '192.168.1.1', '["Suspicious keyword: malware", "Private IP address", "Known malicious domain"]', 'system', 'Known malware distribution site', 'threat_db'],
-https://phishing-bank.com', 'phishing-bank.com', 'malicious', 'high', 90, '2024-08-28T10:33:00', 'http', False, '10.0.0.1', '["Not using HTTPS", "Suspicious keyword: phishing", "Private IP address", "Impersonating financial institution"]', 'manual', 'Phishing site impersonating bank', 'reported'],
-https://suspicious-site.net', 'suspicious-site.net', 'suspicious', 'medium', 55, '2024-08-28T10:34:00', 'https', True, '203.0.113.1', '["Suspicious keyword: suspicious", "Recently registered domain", "Multiple redirects"]', 'system', 'Site showing suspicious behavior', 'auto_scan'],
-https://bit.ly/suspicious', 'bit.ly', 'suspicious', 'medium', 45, '2024-08-28T10:35:00', 'https', True, '67.199.248.10', '["URL shortener", "Destination unknown"]', 'system', 'URL shortener with unknown destination', 'auto_scan'],
-https://amazon.com', 'amazon.com', 'safe', 'low', 8, '2024-08-28T10:36:00', 'https', True, '205.251.242.103', '["Legitimate e-commerce"]', 'system', 'Major e-commerce platform', 'verified'],
-https://paypal-security-update.com', 'paypal-security-update.com', 'malicious', 'high', 88, '2024-08-28T10:37:00', 'https', False, '192.0.2.1', '["Suspicious keyword: paypal", "Suspicious keyword: security", "Impersonating financial service"]', 'manual', 'Phishing site targeting PayPal users', 'reported'],
-http://192.168.1.100/login', '192.168.1.100', 'suspicious', 'medium', 60, '2024-08-28T10:38:00', 'http', False, '192.168.1.100', '["Not using HTTPS", "Private IP address", "Login page on private network"]', 'system', 'Suspicious login page on private network', 'internal_scan'],
-https://microsoft.com', 'microsoft.com', 'safe', 'low', 5, '2024-08-28T10:39:00', 'https', True, '20.112.52.29', '["Legitimate technology company"]', 'system', 'Major technology company', 'verified']
+url,domain,status,threat_level,risk_score,timestamp,protocol,ssl_valid,ip_address,risk_factors,analyzed_by,notes,category
+https://google.com,google.com,safe,low,5,2024-08-28T10:30:00,https,True,142.250.191.14,"['Minor risk factors']",system,Legitimate search engine,verified
+https://facebook.com,facebook.com,safe,low,10,2024-08-28T10:31:00,https,True,157.240.241.35,"['Standard social media site']",system,Popular social network,verified
+https://malware-example.com,malware-example.com,malicious,high,95,2024-08-28T10:32:00,https,False,192.168.1.1,"['Suspicious keyword: malware', 'Private IP address', 'Known malicious domain']",system,Known malware distribution site,threat_db
+https://phishing-bank.com,phishing-bank.com,malicious,high,90,2024-08-28T10:33:00,http,False,10.0.0.1,"['Not using HTTPS', 'Suspicious keyword: phishing', 'Private IP address', 'Impersonating financial institution']",manual,Phishing site impersonating bank,reported
+https://suspicious-site.net,suspicious-site.net,suspicious,medium,55,2024-08-28T10:34:00,https,True,203.0.113.1,"['Suspicious keyword: suspicious', 'Recently registered domain', 'Multiple redirects']",system,Site showing suspicious behavior,auto_scan
+https://bit.ly/suspicious,bit.ly,suspicious,medium,45,2024-08-28T10:35:00,https,True,67.199.248.10,"['URL shortener', 'Destination unknown']",system,URL shortener with unknown destination,auto_scan
+https://amazon.com,amazon.com,safe,low,8,2024-08-28T10:36:00,https,True,205.251.242.103,"['Legitimate e-commerce']",system,Major e-commerce platform,verified
+https://paypal-security-update.com,paypal-security-update.com,malicious,high,88,2024-08-28T10:37:00,https,False,192.0.2.1,"['Suspicious keyword: paypal', 'Suspicious keyword: security', 'Impersonating financial service']",manual,Phishing site targeting PayPal users,reported
+http://192.168.1.100/login,192.168.1.100,suspicious,medium,60,2024-08-28T10:38:00,http,False,192.168.1.100,"['Not using HTTPS', 'Private IP address', 'Login page on private network']",system,Suspicious login page on private network,internal_scan
+https://microsoft.com,microsoft.com,safe,low,5,2024-08-28T10:39:00,https,True,20.112.52.29,"['Legitimate technology company']",system,Major technology company,verified
 
 

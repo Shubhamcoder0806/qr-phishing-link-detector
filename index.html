@@ -794,6 +794,10 @@
           body: JSON.stringify({ url: url })
         });
 
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+
         const data = await response.json();
         
         let status, message, iconClass, detailsData;
@@ -969,6 +973,7 @@
   </script>
 </body>
 </html>
+
 
 
 

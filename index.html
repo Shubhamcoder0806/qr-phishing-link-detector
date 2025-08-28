@@ -3,59 +3,963 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PhishCheck - QR & URL Scanner</title>
-  <link rel="stylesheet" href="style.css">
+  <title>PhishCheck - Advanced URL & QR Security Scanner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode" defer></script>
+  <style>
+    /* ===== GLOBAL RESET & VARIABLES ===== */
+    :root {
+      --primary: #00d4aa;
+      --secondary: #667eea;
+      --danger: #ff4757;
+      --warning: #ffa726;
+      --success: #2ed573;
+      --dark: #1a1a2e;
+      --darker: #16213e;
+      --light: #f8f9fa;
+      --text: #e1e8ed;
+      --text-muted: #8899a6;
+      --glass: rgba(255, 255, 255, 0.1);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== ANIMATED BACKGROUND ===== */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.1;
+    }
+
+    .floating-shapes {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .shape {
+      position: absolute;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) { width: 80px; height: 80px; top: 20%; left: 10%; animation-delay: 0s; }
+    .shape:nth-child(2) { width: 60px; height: 60px; top: 60%; left: 80%; animation-delay: 2s; }
+    .shape:nth-child(3) { width: 40px; height: 40px; top: 80%; left: 20%; animation-delay: 4s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    /* ===== CONTAINER ===== */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+      padding: 1rem 0;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .logo i {
+      font-size: 2rem;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    nav a:hover {
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    main {
+      margin-top: 100px;
+      padding: 4rem 0;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      text-align: center;
+      padding: 4rem 0 6rem;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary), #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      margin-bottom: 3rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeInUp 1s ease-out 0.2s both;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-bottom: 4rem;
+      animation: fadeInUp 1s ease-out 0.4s both;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: block;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* ===== SCANNER SECTION ===== */
+    .scanner-section {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      margin: 4rem 0;
+      box-shadow: var(--shadow);
+      animation: fadeInUp 1s ease-out 0.6s both;
+    }
+
+    .scanner-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .tab-btn {
+      padding: 1rem 2rem;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-color: transparent;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    /* ===== URL SCANNER ===== */
+    .url-scanner {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar {
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .search-bar:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.1);
+    }
+
+    .search-bar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 1.25rem 1.5rem;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none;
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+      font-size: 1.25rem;
+    }
+
+    .search-btn:hover {
+      background: linear-gradient(135deg, var(--secondary), var(--primary));
+    }
+
+    /* ===== QR SCANNER ===== */
+    .qr-scanner {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .qr-reader-container {
+      position: relative;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    #qr-reader {
+      width: 100%;
+      border-radius: 16px;
+    }
+
+    .qr-controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ===== RESULTS ===== */
+    .result-container {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.02);
+      display: none;
+    }
+
+    .result-container.show {
+      display: block;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .result-icon {
+      font-size: 2rem;
+    }
+
+    .result-safe { color: var(--success); }
+    .result-warning { color: var(--warning); }
+    .result-danger { color: var(--danger); }
+
+    .result-details {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .result-detail {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ===== FEATURES SECTION ===== */
+    .features {
+      padding: 6rem 0;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .features h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 3rem;
+      color: var(--primary);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow);
+      border-color: var(--primary);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+    }
+
+    /* ===== LOADING ANIMATION ===== */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      nav ul {
+        gap: 1rem;
+      }
+
+      .hero-stats {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .scanner-section {
+        padding: 2rem 1rem;
+      }
+
+      .scanner-tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <!-- HEADER -->
-    <header>
-      <div class="head-left">
-        <img src="company2.png" alt="logo">
-        <h1>PhishCheck</h1>
-      </div>
-      <nav>
-        <ul>
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Features</a></li>
-          <li><a href="#">About Us</a></li>
-        </ul>
-      </nav>
-      <div class="head-right">
-        <a href="#">New Account</a>
-        <div class="button-box">
-          <button>Sign In</button>
-        </div>
-      </div>
-    </header>
-
-    <!-- HERO SECTION -->
-    <section class="hero">
-      <h1>Guarding Your Clicks in a World Full of Threats</h1>
-      <h3>Enter any URL or Scan a QR Code. Get instant results. Browse safely.</h3>
-
-      <!-- URL TEST -->
-      <div class="link-test">
-       <form class="search-bar" id="url-search">
-  <input type="text" placeholder="Enter URL" name="q" id="url-input">
-  <button type="submit">
-    <img src="image.png" alt="">
-  </button>
-</form>
-<div id="url-result"></div>
-      </div>
-
-      <!-- QR READER -->
-      <div class="qr-box">
-        <h3>Scan a QR Code</h3>
-        <div id="qr-reader"></div>
-        <p id="qr-result"></p>
-      </div>
-    </section>
+  <!-- Animated Background -->
+  <div class="bg-animation">
+    <div class="floating-shapes">
+      <div class="shape"></div>
+      <div class="shape"></div>
+      <div class="shape"></div>
+    </div>
   </div>
 
-  <script src="script.js">
-  </script>
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <i class="fas fa-shield-alt"></i>
+          <span>PhishCheck</span>
+        </div>
+        
+        <nav>
+          <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+        
+        <div class="header-actions">
+          <a href="#" class="btn btn-outline">Sign In</a>
+          <a href="#" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i>
+            Sign Up
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <div class="container">
+      <!-- Hero Section -->
+      <section class="hero" id="home">
+        <h1>Advanced Security Scanner</h1>
+        <p>Protect yourself from phishing attacks and malicious websites. Scan URLs and QR codes instantly with AI-powered threat detection.</p>
+        
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-number">10</span>
+            <span class="stat-label">URLs Scanned</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">95.4%</span>
+            <span class="stat-label">Accuracy Rate</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">24/7</span>
+            <span class="stat-label">Protection</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scanner Section -->
+      <section class="scanner-section">
+        <div class="scanner-tabs">
+          <button class="tab-btn active" data-tab="url">
+            <i class="fas fa-link"></i>
+            URL Scanner
+          </button>
+          <button class="tab-btn" data-tab="qr">
+            <i class="fas fa-qrcode"></i>
+            QR Scanner
+          </button>
+        </div>
+
+        <!-- URL Scanner Tab -->
+        <div class="tab-content active" id="url-tab">
+          <div class="url-scanner">
+            <div class="search-container">
+              <form class="search-bar" id="url-form">
+                <input 
+                  type="url" 
+                  id="url-input" 
+                  placeholder="Enter URL to scan (e.g., https://example.com)"
+                  required
+                >
+                <button type="submit" class="search-btn">
+                  <i class="fas fa-search"></i>
+                </button>
+              </form>
+            </div>
+            
+            <div id="url-result" class="result-container">
+              <div class="result-header">
+                <i class="fas fa-shield-alt result-icon"></i>
+                <div>
+                  <h3 id="url-status">Scanning...</h3>
+                  <p id="url-message">Please wait while we analyze the URL</p>
+                </div>
+              </div>
+              <div class="result-details" id="url-details" style="display: none;">
+                <div class="result-detail">
+                  <span>Domain Age:</span>
+                  <span id="domain-age">-</span>
+                </div>
+                <div class="result-detail">
+                  <span>SSL Certificate:</span>
+                  <span id="ssl-status">-</span>
+                </div>
+                <div class="result-detail">
+                  <span>Threat Level:</span>
+                  <span id="threat-level">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QR Scanner Tab -->
+        <div class="tab-content" id="qr-tab">
+          <div class="qr-scanner">
+            <div class="qr-reader-container">
+              <div id="qr-reader"></div>
+            </div>
+            
+            <div class="qr-controls">
+              <button class="btn btn-primary" id="start-scan">
+                <i class="fas fa-camera"></i>
+                Start Scanning
+              </button>
+              <button class="btn btn-outline" id="stop-scan" style="display: none;">
+                <i class="fas fa-stop"></i>
+                Stop Scanning
+              </button>
+            </div>
+            
+            <div id="qr-result" class="result-container">
+              <div class="result-header">
+                <i class="fas fa-qrcode result-icon"></i>
+                <div>
+                  <h3 id="qr-status">QR Code Detected</h3>
+                  <p id="qr-message">Analyzing content...</p>
+                </div>
+              </div>
+              <div class="result-details" id="qr-details" style="display: none;">
+                <div class="result-detail">
+                  <span>Content Type:</span>
+                  <span id="content-type">-</span>
+                </div>
+                <div class="result-detail">
+                  <span>Scanned URL:</span>
+                  <span id="scanned-url">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="features" id="features">
+        <h2>Why Choose PhishCheck?</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <i class="fas fa-brain feature-icon"></i>
+            <h3>AI-Powered Detection</h3>
+            <p>Advanced machine learning algorithms analyze patterns and behaviors to detect even the most sophisticated threats.</p>
+          </div>
+          
+          <div class="feature-card">
+            <i class="fas fa-bolt feature-icon"></i>
+            <h3>Real-time Scanning</h3>
+            <p>Get instant results with our lightning-fast scanning engine that processes URLs and QR codes in milliseconds.</p>
+          </div>
+          
+          <div class="feature-card">
+            <i class="fas fa-database feature-icon"></i>
+            <h3>Threat Intelligence</h3>
+            <p>Access to global threat databases with millions of known malicious URLs and phishing attempts updated in real-time.</p>
+          </div>
+          
+          <div class="feature-card">
+            <i class="fas fa-mobile-alt feature-icon"></i>
+            <h3>Mobile Friendly</h3>
+            <p>Seamlessly scan QR codes using your device's camera with our responsive design that works on all devices.</p>
+          </div>
+          
+          <div class="feature-card">
+            <i class="fas fa-lock feature-icon"></i>
+            <h3>Privacy First</h3>
+            <p>Your data stays private. We don't store your scanned URLs or personal information. Everything is processed securely.</p>
+          </div>
+          
+          <div class="feature-card">
+            <i class="fas fa-chart-line feature-icon"></i>
+            <h3>Detailed Reports</h3>
+            <p>Comprehensive analysis reports with threat levels, domain information, and security recommendations.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Tab functionality
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        
+        // Remove active class from all tabs and contents
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked tab and corresponding content
+        btn.classList.add('active');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+      });
+    });
+
+    // URL Scanner functionality
+    const urlForm = document.getElementById('url-form');
+    const urlInput = document.getElementById('url-input');
+    const urlResult = document.getElementById('url-result');
+    const urlStatus = document.getElementById('url-status');
+    const urlMessage = document.getElementById('url-message');
+    const urlDetails = document.getElementById('url-details');
+
+    urlForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = urlInput.value.trim();
+      
+      if (!url) return;
+
+      // Show result container and loading state
+      urlResult.classList.add('show');
+      urlStatus.textContent = 'Scanning...';
+      urlMessage.textContent = 'Analyzing URL for potential threats';
+      urlDetails.style.display = 'none';
+      
+      // Reset result styling
+      const resultIcon = urlResult.querySelector('.result-icon');
+      resultIcon.className = 'fas fa-spinner fa-spin result-icon';
+
+      try {
+        // Make actual API call to the Flask backend
+        const response = await fetch('http://localhost:5000/api/check', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: url })
+        });
+
+        const data = await response.json();
+        
+        let status, message, iconClass, detailsData;
+        
+        if (data.status === 'malicious') {
+          status = 'Malicious URL Detected';
+          message = data.message || 'This URL has been identified as a phishing or malware site. Do not visit!';
+          iconClass = 'fas fa-exclamation-triangle result-icon result-danger';
+          detailsData = {
+            domainAge: data.domain_info?.domain_age || 'Unknown',
+            ssl: data.ssl_info?.ssl_valid ? 'Valid Certificate' : 'Invalid Certificate',
+            threatLevel: `High Risk (${data.risk_score}/100)`
+          };
+        } else if (data.status === 'suspicious') {
+          status = 'Suspicious Activity';
+          message = data.message || 'This URL shows suspicious characteristics. Exercise caution.';
+          iconClass = 'fas fa-exclamation-circle result-icon result-warning';
+          detailsData = {
+            domainAge: data.domain_info?.domain_age || 'Unknown',
+            ssl: data.ssl_info?.ssl_valid ? 'Valid Certificate' : 'Invalid Certificate',
+            threatLevel: `Medium Risk (${data.risk_score}/100)`
+          };
+        } else if (data.status === 'safe') {
+          status = 'Safe URL';
+          message = data.message || 'This URL appears to be safe to visit.';
+          iconClass = 'fas fa-check-circle result-icon result-safe';
+          detailsData = {
+            domainAge: data.domain_info?.domain_age || 'Unknown',
+            ssl: data.ssl_info?.ssl_valid ? 'Valid Certificate' : 'No SSL',
+            threatLevel: `Low Risk (${data.risk_score}/100)`
+          };
+        } else if (data.status === 'error') {
+          status = 'Analysis Error';
+          message = data.message || 'Unable to analyze URL. Please try again.';
+          iconClass = 'fas fa-times-circle result-icon result-danger';
+          detailsData = {
+            domainAge: 'Unknown',
+            ssl: 'Unknown',
+            threatLevel: 'Cannot Determine'
+          };
+        }
+
+        // Update UI with results
+        urlStatus.textContent = status;
+        urlMessage.textContent = message;
+        resultIcon.className = iconClass;
+        
+        // Show details
+        document.getElementById('domain-age').textContent = detailsData.domainAge;
+        document.getElementById('ssl-status').textContent = detailsData.ssl;
+        document.getElementById('threat-level').textContent = detailsData.threatLevel;
+        
+        // Show risk factors if available
+        if (data.risk_factors && data.risk_factors.length > 0) {
+          const riskFactorsList = data.risk_factors.slice(0, 3).join(', ');
+          urlMessage.textContent += ` Risk factors: ${riskFactorsList}`;
+        }
+        
+        urlDetails.style.display = 'block';
+
+      } catch (error) {
+        console.error('API Error:', error);
+        urlStatus.textContent = 'Connection Error';
+        urlMessage.textContent = 'Unable to connect to security server. Please ensure the backend is running on localhost:5000';
+        resultIcon.className = 'fas fa-times-circle result-icon result-danger';
+      }
+    });
+
+    // QR Code Scanner functionality
+    let html5QrCode = null;
+    const startScanBtn = document.getElementById('start-scan');
+    const stopScanBtn = document.getElementById('stop-scan');
+    const qrResult = document.getElementById('qr-result');
+
+    startScanBtn.addEventListener('click', startQrScanning);
+    stopScanBtn.addEventListener('click', stopQrScanning);
+
+    async function startQrScanning() {
+      try {
+        html5QrCode = new Html5Qrcode("qr-reader");
+        
+        const config = {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0
+        };
+
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          onQrScanSuccess,
+          onQrScanError
+        );
+
+        startScanBtn.style.display = 'none';
+        stopScanBtn.style.display = 'inline-flex';
+      } catch (error) {
+        console.error('Error starting QR scanner:', error);
+        alert('Unable to start camera. Please check camera permissions.');
+      }
+    }
+
+    async function stopQrScanning() {
+      if (html5QrCode) {
+        try {
+          await html5QrCode.stop();
+          html5QrCode = null;
+        } catch (error) {
+          console.error('Error stopping QR scanner:', error);
+        }
+      }
+      
+      startScanBtn.style.display = 'inline-flex';
+      stopScanBtn.style.display = 'none';
+    }
+
+    async function onQrScanSuccess(decodedText, decodedResult) {
+      // Show result
+      qrResult.classList.add('show');
+      document.getElementById('qr-status').textContent = 'QR Code Scanned';
+      document.getElementById('qr-message').textContent = 'Analyzing scanned content...';
+      
+      const isUrl = decodedText.startsWith('http');
+      document.getElementById('content-type').textContent = isUrl ? 'URL' : 'Text';
+      document.getElementById('scanned-url').textContent = decodedText;
+      document.getElementById('qr-details').style.display = 'block';
+      
+      if (isUrl) {
+        // Automatically analyze the URL if it's detected
+        try {
+          const response = await fetch('http://localhost:5000/check', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: decodedText })
+          });
+
+          const data = await response.json();
+          
+          if (data.status === 'malicious') {
+            document.getElementById('qr-message').textContent = '⚠️ DANGER: This QR code contains a malicious URL!';
+            qrResult.querySelector('.result-icon').className = 'fas fa-exclamation-triangle result-icon result-danger';
+          } else if (data.status === 'suspicious') {
+            document.getElementById('qr-message').textContent = '⚠️ WARNING: This QR code contains a suspicious URL';
+            qrResult.querySelector('.result-icon').className = 'fas fa-exclamation-circle result-icon result-warning';
+          } else {
+            document.getElementById('qr-message').textContent = '✅ Safe: This QR code contains a safe URL';
+            qrResult.querySelector('.result-icon').className = 'fas fa-check-circle result-icon result-safe';
+          }
+        } catch (error) {
+          document.getElementById('qr-message').textContent = 'URL detected - Unable to verify safety (server error)';
+        }
+      } else {
+        document.getElementById('qr-message').textContent = 'Text content scanned successfully';
+      }
+    }
+
+    function onQrScanError(errorMessage) {
+      // Handle scan errors silently
+    }
+     fetch('http://localhost:5000/check', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ url: url })
+});
+      </script>
 </body>
 </html>

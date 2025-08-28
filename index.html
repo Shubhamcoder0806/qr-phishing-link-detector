@@ -955,7 +955,7 @@
     function onQrScanError(errorMessage) {
       // Handle scan errors silently
     }
-     fetch('http://localhost:5000/check', {
+     fetch('/api/check', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ url: url })
@@ -963,4 +963,5 @@
       </script>
 </body>
 </html>
+
 

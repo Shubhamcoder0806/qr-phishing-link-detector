@@ -1,35 +1,38 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import re
-
-app = Flask(__name__)
-CORS(app)
-
+import json
 import pandas as pd
-
-app = Flask(__name__)
+import os
 
 # Load dataset once
-df = pd.read_csv("urls.csv")
+dataset_path = os.path.join(os.path.dirname(__file__), "dataset.csv")
+df = pd.read_csv(dataset_path)
 
-@app.route("/check", methods=["POST"])
-def check_url():
-    data = request.json
-    url = data.get("url")
+def handler(request):
+    try:
+        data = json.loads(request.body)
+        url = data.get("url")
+        if not url:
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"status": "error", "message": "URL is required"})
+            }
 
-    # Search dataset for given URL
-    record = df[df["url"] == url]
+        # Search dataset
+        record = df[df["url"] == url]
+        if record.empty:
+            return {
+                "statusCode": 200,
+                "body": json.dumps({"status": "unknown", "message": "URL not found in dataset"})
+            }
 
-    if record.empty:
-        return jsonify({"status": "unknown", "message": "URL not found in dataset"}), 404
+        # Convert row to dict
+        result = record.iloc[0].to_dict()
+        return {
+            "statusCode": 200,
+            "body": json.dumps(result)
+        }
 
-    # Convert row to dict
-    result = record.iloc[0].to_dict()
-    return jsonify(result)
-
-if __name__ == "__main__":
-    app.run(debug=True,)
-
-
-CORS(app, resources={r"*": {"origins": "*"}})
-
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"status": "error", "message": str(e)})
+        }

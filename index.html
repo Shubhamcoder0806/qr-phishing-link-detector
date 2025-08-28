@@ -786,7 +786,7 @@
 
       try {
         // Make actual API call to the Flask backend
-        const response = await fetch('api/check', {
+        const response = await fetch(check.py, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -924,7 +924,7 @@
       if (isUrl) {
         // Automatically analyze the URL if it's detected
         try {
-          const response = await fetch('/api/check', {
+          const response = await fetch(check.py, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -955,7 +955,7 @@
     function onQrScanError(errorMessage) {
       // Handle scan errors silently
     }
-     fetch('/api/check', {
+     fetch(check.py, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ url: url })
@@ -963,5 +963,6 @@
       </script>
 </body>
 </html>
+
 
 

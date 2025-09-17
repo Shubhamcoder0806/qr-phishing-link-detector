@@ -373,5 +373,10 @@ checkURL({
     has_suspicious_words: false
 });
 
+const response = await fetch('https://your-vercel-url.vercel.app/api/check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(features)
+});
 
 

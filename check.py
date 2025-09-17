@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 import joblib
 
 # Load dataset
-df = pd.read_csv('Database/All.csv')
+df = pd.read_csv('All.csv')
 
 # Define feature columns
 features = [
@@ -76,4 +76,5 @@ model.fit(X_train, y_train)
 
 # Save model
 joblib.dump(model, 'phishing_model.pkl')
+
 

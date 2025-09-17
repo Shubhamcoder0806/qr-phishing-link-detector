@@ -330,6 +330,31 @@ checkURL({
     has_shortening_service: false,
     has_suspicious_words: false
 });
+const checkURL = async (url) => {
+    try {
+        const response = await fetch('https://your-vercel-url.vercel.app/api/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            console.log('Status:', result.data.status);
+            console.log('Risk Score:', result.data.risk_score);
+            console.log('Message:', result.data.message);
+        } else {
+            console.error('Error:', result.error);
+        }
+    } catch (error) {
+        console.error('Network error:', error);
+    }
+};
+
+
 
 
 

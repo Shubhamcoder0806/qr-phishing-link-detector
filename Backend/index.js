@@ -11,58 +11,75 @@ app.use(express.json());
 
 let dataset = [];
 
-// Load CSV dataset from GitHub on server start
-const DATASET_URL = 'https://raw.githubusercontent.com/Shubhamcoder0806/qr-phishing-link-detector/refs/heads/main/Database/url.csv';
+// GitHub raw CSV file link
+const DATASET_URL = '';
 
+// Function to load dataset
 async function loadDataset() {
+  try {
+    console.log('Fetching dataset from GitHub...');
     const response = await fetch(DATASET_URL);
 
     if (!response.ok) {
-        console.error('Failed to fetch dataset from GitHub.');
-        return;
+      console.error('Failed to fetch dataset. Status:', response.status);
+      return;
     }
+
+    dataset = []; // Reset dataset before loading
 
     response.body
-        .pipe(csv())
-        .on('data', (row) => dataset.push(row))
-        .on('end', () => console.log('Dataset loaded successfully from GitHub.'));
+      .pipe(csv())
+      .on('data', (row) => {
+        dataset.push(row);
+      })
+      .on('end', () => {
+        console.log('✅ Dataset loaded successfully. Rows:', dataset.length);
+      })
+      .on('error', (err) => {
+        console.error('CSV Parsing Error:', err);
+      });
+  } catch (err) {
+    console.error('Error loading dataset:', err);
+  }
 }
 
+// Call it once at startup
 loadDataset();
 
-// API Endpoint to check URL against dataset
+// API to check URL
 app.post('/api/check', (req, res) => {
-    const { url } = req.body;
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ success: false, error: 'URL is required' });
 
-    console.log('Received URL:', url);
+  console.log('🔍 Checking URL:', url);
 
-    const entry = dataset.find(item => url.includes(item.url));
+  const entry = dataset.find(item => item.url && url.includes(item.url));
 
-    if (entry) {
-        return res.json({
-            success: true,
-            data: {
-                status: entry.type || 'unknown',
-                risk_score: entry.risk_score || 0,
-                message: `Matched dataset entry: ${entry.category || 'N/A'}`,
-            }
-        });
-    }
-
-    const randomRisk = Math.floor(Math.random() * 100);
-    const status = randomRisk > 80 ? 'malicious' : randomRisk > 50 ? 'suspicious' : 'safe';
-
+  if (entry) {
     return res.json({
-        success: true,
-        data: {
-            status: status,
-            risk_score: randomRisk,
-            message: 'Generated prediction based on fallback logic.'
-        }
+      success: true,
+      data: {
+        status: entry.type || 'unknown',
+        risk_score: entry.risk_score || 0,
+        message: `Matched dataset entry: ${entry.category || 'N/A'}`
+      }
     });
+  }
+
+  // Fallback: random prediction
+  const randomRisk = Math.floor(Math.random() * 100);
+  const status = randomRisk > 80 ? 'malicious' : randomRisk > 50 ? 'suspicious' : 'safe';
+
+  return res.json({
+    success: true,
+    data: {
+      status,
+      risk_score: randomRisk,
+      message: 'Generated prediction (not in dataset)'
+    }
+  });
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+  console.log(`🚀 Server running at http://localhost:${port}`);
 });
-

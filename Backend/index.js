@@ -12,7 +12,7 @@ app.use(express.json());
 let dataset = [];
 
 // Load CSV dataset from GitHub on server start
-const DATASET_URL = '';
+const DATASET_URL = 'https://raw.githubusercontent.com/Shubhamcoder0806/qr-phishing-link-detector/refs/heads/main/Database/url.csv';
 
 async function loadDataset() {
     const response = await fetch(DATASET_URL);

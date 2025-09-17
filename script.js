@@ -41,45 +41,6 @@ const mockDataset = [
   { url: "https://trusted-site.net", type: "safe", risk_score: 3 },
 ];
 
-// API Endpoint to check URL features
-app.post('/api/check', (req, res) => {
-  const { url_length, number_of_dots, number_of_hyphens, has_ip_address, has_https } = req.body;
-
-  console.log('Received features:', req.body);
-
-  // For demo: use the mockDataset and a simple match based on feature heuristics
-  const found = mockDataset.find(item => req.body.url && req.body.url.includes(item.url));
-
-  if (found) {
-    return res.json({
-      success: true,
-      data: {
-        status: found.type,
-        risk_score: found.risk_score,
-        message: `Matched predefined URL in dataset as ${found.type}.`
-      }
-    });
-  }
-
-  // Generate random prediction if not in dataset
-  const randomRisk = Math.floor(Math.random() * 100);
-  const status = randomRisk > 80 ? 'malicious' : randomRisk > 50 ? 'suspicious' : 'safe';
-
-  return res.json({
-    success: true,
-    data: {
-      status: status,
-      risk_score: randomRisk,
-      message: 'Generated prediction based on heuristics (mock model).'
-    }
-  });
-});
-
-// Start server
-app.listen(port, () => {
-  console.log(`Backend running at http://localhost:${port}`);
-});
-
 // Track total scans
     let totalScans = 0;
 
@@ -411,6 +372,7 @@ checkURL({
     has_shortening_service: false,
     has_suspicious_words: false
 });
+
 
 
 

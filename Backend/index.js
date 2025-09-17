@@ -84,7 +84,4 @@ app.post('/api/check', (req, res) => {
   });
 });
 
-// Start server
-app.listen(port, () => {
-  console.log(`Backend running at http://localhost:${port}`);
-});
+

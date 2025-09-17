@@ -10,7 +10,7 @@ let dataset = [];
 
 // Load CSV from GitHub
 async function loadCSV() {
-  const url = 'https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/main/All.csv';  // Replace with your actual CSV URL
+  const url = 'https://raw.githubusercontent.com/Shubhamcoder0806/qr-phishing-link-detector/refs/heads/main/Database/Phishing.csv';  // Replace with your actual CSV URL
   
   const response = await fetch(url);
   const csvText = await response.text();

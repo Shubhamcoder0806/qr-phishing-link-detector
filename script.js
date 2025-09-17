@@ -332,4 +332,43 @@
       // Handle scan errors silently
     }
 
+const checkURL = async (features) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(features)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('Prediction:', result.data.status);
+            console.log('Risk Score:', result.data.risk_score);
+            console.log('Message:', result.data.message);
+        } else {
+            console.error('Error:', result.error);
+        }
+    } catch (error) {
+        console.error('Network error:', error);
+    }
+};
+
+// Example usage
+checkURL({
+    url_length: 45,
+    number_of_dots: 2,
+    number_of_hyphens: 0,
+    number_of_underscores: 1,
+    number_of_slashes: 3,
+    number_of_digits: 4,
+    number_of_parameters: 0,
+    has_ip_address: false,
+    has_https: true,
+    has_shortening_service: false,
+    has_suspicious_words: false
+});
+
 
